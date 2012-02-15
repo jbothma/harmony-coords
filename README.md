@@ -1,6 +1,6 @@
-harmony
+harmony-coords
 =======
 
-#### Procedural Drawing Tool ####
+#### Drawing Tool based on http://mrdoob.com/projects/harmony/ ####
 
-[![Flattr this](http://api.flattr.com/button/button-compact-static-100x17.png)](http://flattr.com/thing/288/harmony)
+Let's call it harmony-coords for now.
