@@ -28,7 +28,8 @@ var SCREEN_WIDTH = window.innerWidth,
     isAboutVisible = false,
     isMenuMouseOver = false,
     shiftKeyIsDown = false,
-    altKeyIsDown = false;
+    altKeyIsDown = false,
+    strokes = [];
 
 init();
 
@@ -465,7 +466,7 @@ function onCanvasTouchStart( event )
 	if(event.touches.length == 1)
 	{
 		event.preventDefault();
-		
+				
 		brush.strokeStart( event.touches[0].pageX, event.touches[0].pageY );
 		
 		window.addEventListener('touchmove', onCanvasTouchMove, false);
@@ -477,7 +478,6 @@ function onCanvasTouchMove( event )
 {
 	if(event.touches.length == 1)
 	{
-		event.preventDefault();
 		brush.stroke( event.touches[0].pageX, event.touches[0].pageY );
 	}
 }

@@ -21,12 +21,14 @@ simple.prototype =
 
 	strokeStart: function( mouseX, mouseY )
 	{
+		strokes.push([[mouseX, mouseY]]);
 		this.prevMouseX = mouseX;
 		this.prevMouseY = mouseY;
 	},
 
 	stroke: function( mouseX, mouseY )
 	{
+		strokes[strokes.length-1].push([mouseX, mouseY])
 		this.context.lineWidth = BRUSH_SIZE;	
 		this.context.strokeStyle = "rgba(" + COLOR[0] + ", " + COLOR[1] + ", " + COLOR[2] + ", " + 0.5 * BRUSH_PRESSURE + ")";
 		
