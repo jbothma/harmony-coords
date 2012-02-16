@@ -111,7 +111,12 @@ function init()
 				context.drawImage(localStorageImage,0,0);
 			}, false);
 			
-			localStorageImage.src = localStorage.canvas;			
+			localStorageImage.src = localStorage.canvas;
+		}
+		
+		if (localStorage.strokes)
+		{
+			strokes = localStorage.strokes;
 		}
 		
 		if (localStorage.brush_color_red)
@@ -391,6 +396,8 @@ function onMenuClear()
 		
 	context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+	strokes = [];
+
 	saveToLocalStorage();
 
 	brush.destroy();
@@ -500,6 +507,7 @@ function onCanvasTouchEnd( event )
 function saveToLocalStorage()
 {
 	localStorage.canvas = canvas.toDataURL('image/png');
+	localStorage.strokes = JSON.stringify(strokes);
 }
 
 function flatten()
