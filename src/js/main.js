@@ -463,7 +463,7 @@ function onCanvasTouchMove( event )
 {
 	if(event.touches.length == 1)
 	{
-		strokes.push([[ event.touches[0].pageX, event.touches[0].pageY ]]);
+		strokes[strokes.length-1].push([event.touches[0].pageX, event.touches[0].pageY]);
 		brush.stroke( event.touches[0].pageX, event.touches[0].pageY );
 	}
 }
