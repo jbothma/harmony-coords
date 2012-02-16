@@ -36,10 +36,7 @@ function init()
 	var hash, palette, embed, localStorageImage;
 	
 	if (USER_AGENT.search("android") > -1 || USER_AGENT.search("iphone") > -1)
-		BRUSH_SIZE = 2;	
-		
-	if (USER_AGENT.search("safari") > -1 && USER_AGENT.search("chrome") == -1) // Safari
-		STORAGE = false;
+		BRUSH_SIZE = 2;
 	
 	document.body.style.backgroundRepeat = 'no-repeat';
 	document.body.style.backgroundPosition = 'center center';	
@@ -135,9 +132,9 @@ function init()
 			BACKGROUND_COLOR[2] = localStorage.background_color_blue;
 		}
 	
-		if (localStorage.strokes)
+		if (localStorage.getItem("strokes"))
 		{
-			strokes = JSON.parse(localStorage.strokes);
+			strokes = JSON.parse(localStorage.getItem("strokes"));
 			redraw(strokes);
 		}
 	} else {
@@ -450,6 +447,8 @@ function onCanvasTouchStart( event )
 	if(event.touches.length == 1)
 	{
 		event.preventDefault();
+		
+		clearTimeout(saveTimeOut);
 
 		strokes.push([[ event.touches[0].pageX, event.touches[0].pageY ]]);
 		brush.strokeStart( event.touches[0].pageX, event.touches[0].pageY );
@@ -478,6 +477,12 @@ function onCanvasTouchEnd( event )
 
 		window.removeEventListener('touchmove', onCanvasTouchMove, false);
 		window.removeEventListener('touchend', onCanvasTouchEnd, false);
+		
+		if (STORAGE)
+		{
+			clearTimeout(saveTimeOut);
+			saveTimeOut = setTimeout(saveToLocalStorage, 2000, true);
+		}
 	}
 }
 
@@ -486,7 +491,7 @@ function onCanvasTouchEnd( event )
 function saveToLocalStorage()
 {
 	//localStorage.canvas = canvas.toDataURL('image/png');
-	localStorage.strokes = JSON.stringify(strokes);
+	localStorage.setItem("strokes", JSON.stringify(strokes));
 }
 
 function redraw(strokes)
