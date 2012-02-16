@@ -1,5 +1,5 @@
 const REV = 6,
-       BRUSHES = ["sketchy", "shaded", "chrome", "fur", "longfur", "web", "", "simple", "squares", "ribbon", "", "circles", "grid"],
+       BRUSHES = ["simple"],
        USER_AGENT = navigator.userAgent.toLowerCase();
 
 var SCREEN_WIDTH = window.innerWidth,
@@ -19,13 +19,11 @@ var SCREEN_WIDTH = window.innerWidth,
     foregroundColorSelector,
     backgroundColorSelector,
     menu,
-    about,
     canvas,
     flattenCanvas,
     context,
     isFgColorSelectorVisible = false,
     isBgColorSelectorVisible = false,
-    isAboutVisible = false,
     isMenuMouseOver = false,
     shiftKeyIsDown = false,
     altKeyIsDown = false,
@@ -93,32 +91,12 @@ function init()
 	menu.save.addEventListener('touchend', onMenuSave, false);
 	menu.clear.addEventListener('click', onMenuClear, false);
 	menu.clear.addEventListener('touchend', onMenuClear, false);
-	menu.about.addEventListener('click', onMenuAbout, false);
-	menu.about.addEventListener('touchend', onMenuAbout, false);
 	menu.container.addEventListener('mouseover', onMenuMouseOver, false);
 	menu.container.addEventListener('mouseout', onMenuMouseOut, false);
 	container.appendChild(menu.container);
 
 	if (STORAGE)
-	{
-		if (localStorage.canvas)
-		{
-			localStorageImage = new Image();
-		
-			localStorageImage.addEventListener("load", function(event)
-			{
-				localStorageImage.removeEventListener(event.type, arguments.callee, false);
-				context.drawImage(localStorageImage,0,0);
-			}, false);
-			
-			localStorageImage.src = localStorage.canvas;
-		}
-		
-		if (localStorage.strokes)
-		{
-			strokes = localStorage.strokes;
-		}
-		
+	{		
 		if (localStorage.brush_color_red)
 		{
 			COLOR[0] = localStorage.brush_color_red;
@@ -156,9 +134,15 @@ function init()
 	{
 		brush = eval("new " + BRUSHES[0] + "(context)");
 	}
-	
-	about = new About();
-	container.appendChild(about.container);
+
+	if (STORAGE) // once brush is selected...
+	{	
+		if (localStorage.strokes)
+		{
+			strokes = JSON.parse(localStorage.strokes);
+			redraw(strokes);
+		}
+	}
 	
 	window.addEventListener('mousemove', onWindowMouseMove, false);
 	window.addEventListener('resize', onWindowResize, false);
@@ -194,9 +178,6 @@ function onWindowResize()
 	SCREEN_HEIGHT = window.innerHeight;
 	
 	menu.container.style.left = ((SCREEN_WIDTH - menu.container.offsetWidth) / 2) + 'px';
-	
-	about.container.style.left = ((SCREEN_WIDTH - about.container.offsetWidth) / 2) + 'px';
-	about.container.style.top = ((SCREEN_HEIGHT - about.container.offsetHeight) / 2) + 'px';
 }
 
 function onWindowKeyDown( event )
@@ -404,15 +385,6 @@ function onMenuClear()
 	brush = eval("new " + BRUSHES[menu.selector.selectedIndex] + "(context)");
 }
 
-function onMenuAbout()
-{
-	cleanPopUps();
-
-	isAboutVisible = true;
-	about.show();
-}
-
-
 // CANVAS
 
 function onCanvasMouseDown( event )
@@ -436,6 +408,7 @@ function onCanvasMouseDown( event )
 	
 	BRUSH_PRESSURE = wacom && wacom.isWacom ? wacom.pressure : 1;
 	
+	strokes.push([[event.clientX, event.clientY]]);
 	brush.strokeStart( event.clientX, event.clientY );
 
 	window.addEventListener('mousemove', onCanvasMouseMove, false);
@@ -446,6 +419,7 @@ function onCanvasMouseMove( event )
 {
 	BRUSH_PRESSURE = wacom && wacom.isWacom ? wacom.pressure : 1;
 	
+	strokes[strokes.length-1].push([event.clientX, event.clientY]);
 	brush.stroke( event.clientX, event.clientY );
 }
 
@@ -473,7 +447,8 @@ function onCanvasTouchStart( event )
 	if(event.touches.length == 1)
 	{
 		event.preventDefault();
-				
+
+		strokes.push([[ event.touches[0].pageX, event.touches[0].pageY ]]);
 		brush.strokeStart( event.touches[0].pageX, event.touches[0].pageY );
 		
 		window.addEventListener('touchmove', onCanvasTouchMove, false);
@@ -485,6 +460,7 @@ function onCanvasTouchMove( event )
 {
 	if(event.touches.length == 1)
 	{
+		strokes.push([[ event.touches[0].pageX, event.touches[0].pageY ]]);
 		brush.stroke( event.touches[0].pageX, event.touches[0].pageY );
 	}
 }
@@ -506,8 +482,26 @@ function onCanvasTouchEnd( event )
 
 function saveToLocalStorage()
 {
-	localStorage.canvas = canvas.toDataURL('image/png');
+	//localStorage.canvas = canvas.toDataURL('image/png');
 	localStorage.strokes = JSON.stringify(strokes);
+}
+
+function redraw(strokes)
+{
+	for (stroke in strokes)
+	{
+		console.log("drawing " + stroke);
+		moves = strokes[stroke];
+		
+		brush.strokeStart(moves[0][0],moves[0][1]);
+		
+		for(move in moves)
+		{
+			brush.stroke(moves[move][0],moves[move][1]);
+		}
+		
+		brush.strokeEnd();
+	}
 }
 
 function flatten()
@@ -531,11 +525,5 @@ function cleanPopUps()
 	{
 		backgroundColorSelector.hide();
 		isBgColorSelectorVisible = false;
-	}
-	
-	if (isAboutVisible)
-	{
-		about.hide();
-		isAboutVisible = false;
 	}
 }

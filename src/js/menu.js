@@ -13,7 +13,6 @@ Menu.prototype =
 	selector: null,
 	save: null,
 	clear: null,
-	about: null,
 	
 	init: function()
 	{
@@ -78,11 +77,6 @@ Menu.prototype =
 
 		separator = document.createTextNode(" | ");
 		this.container.appendChild(separator);
-
-		this.about = document.createElement("About");
-		this.about.className = 'button';
-		this.about.innerHTML = 'About';
-		this.container.appendChild(this.about);
 	},
 	
 	setForegroundColor: function( color )
