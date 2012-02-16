@@ -89,6 +89,8 @@ function init()
 	menu.selector.addEventListener('change', onMenuSelectorChange, false);
 	menu.save.addEventListener('click', onMenuSave, false);
 	menu.save.addEventListener('touchend', onMenuSave, false);
+	menu.coords.addEventListener('click', onMenuCoords, false);
+	menu.coords.addEventListener('touchend', onMenuCoords, false);
 	menu.clear.addEventListener('click', onMenuClear, false);
 	menu.clear.addEventListener('touchend', onMenuClear, false);
 	menu.container.addEventListener('mouseover', onMenuMouseOver, false);
@@ -368,6 +370,16 @@ function onMenuSave()
 	// window.open(canvas.toDataURL('image/png'),'mywindow');
 	flatten();
 	window.open(flattenCanvas.toDataURL('image/png'),'mywindow');
+}
+
+function onMenuCoords()
+{
+	var strokesString = "";
+	for (stroke in strokes)
+	{
+		strokesString += JSON.stringify(strokes[stroke]) + "\n";
+	}
+	alert(strokesString);
 }
 
 function onMenuClear()

@@ -12,6 +12,7 @@ Menu.prototype =
 	
 	selector: null,
 	save: null,
+	coords: null,
 	clear: null,
 	
 	init: function()
@@ -77,6 +78,11 @@ Menu.prototype =
 
 		separator = document.createTextNode(" | ");
 		this.container.appendChild(separator);
+		
+		this.coords = document.createElement("span"); //getElementById('coords');
+		this.coords.className = 'button';
+		this.coords.innerHTML = 'Coords';
+		this.container.appendChild(this.coords);
 	},
 	
 	setForegroundColor: function( color )
