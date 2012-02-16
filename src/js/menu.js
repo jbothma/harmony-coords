@@ -11,7 +11,6 @@ Menu.prototype =
 	backgroundColor: null,
 	
 	selector: null,
-	save: null,
 	coords: null,
 	clear: null,
 	
@@ -62,11 +61,6 @@ Menu.prototype =
 
 		space = document.createTextNode(" ");
 		this.container.appendChild(space);
-		
-		this.save = document.createElement("span"); //getElementById('save');
-		this.save.className = 'button';
-		this.save.innerHTML = 'Save';
-		this.container.appendChild(this.save);
 		
 		space = document.createTextNode(" ");
 		this.container.appendChild(space);

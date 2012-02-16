@@ -87,8 +87,6 @@ function init()
 	menu.backgroundColor.addEventListener('click', onMenuBackgroundColor, false);
 	menu.backgroundColor.addEventListener('touchend', onMenuBackgroundColor, false);
 	menu.selector.addEventListener('change', onMenuSelectorChange, false);
-	menu.save.addEventListener('click', onMenuSave, false);
-	menu.save.addEventListener('touchend', onMenuSave, false);
 	menu.coords.addEventListener('click', onMenuCoords, false);
 	menu.coords.addEventListener('touchend', onMenuCoords, false);
 	menu.clear.addEventListener('click', onMenuClear, false);
@@ -96,23 +94,6 @@ function init()
 	menu.container.addEventListener('mouseover', onMenuMouseOver, false);
 	menu.container.addEventListener('mouseout', onMenuMouseOut, false);
 	container.appendChild(menu.container);
-
-	if (STORAGE)
-	{		
-		if (localStorage.brush_color_red)
-		{
-			COLOR[0] = localStorage.brush_color_red;
-			COLOR[1] = localStorage.brush_color_green;
-			COLOR[2] = localStorage.brush_color_blue;
-		}
-
-		if (localStorage.background_color_red)
-		{
-			BACKGROUND_COLOR[0] = localStorage.background_color_red;
-			BACKGROUND_COLOR[1] = localStorage.background_color_green;
-			BACKGROUND_COLOR[2] = localStorage.background_color_blue;
-		}
-	}
 
 	foregroundColorSelector.setColor( COLOR );
 	backgroundColorSelector.setColor( BACKGROUND_COLOR );
@@ -137,13 +118,30 @@ function init()
 		brush = eval("new " + BRUSHES[0] + "(context)");
 	}
 
-	if (STORAGE) // once brush is selected...
-	{	
+
+	if (STORAGE)
+	{		
+		if (localStorage.brush_color_red)
+		{
+			COLOR[0] = localStorage.brush_color_red;
+			COLOR[1] = localStorage.brush_color_green;
+			COLOR[2] = localStorage.brush_color_blue;
+		}
+
+		if (localStorage.background_color_red)
+		{
+			BACKGROUND_COLOR[0] = localStorage.background_color_red;
+			BACKGROUND_COLOR[1] = localStorage.background_color_green;
+			BACKGROUND_COLOR[2] = localStorage.background_color_blue;
+		}
+	
 		if (localStorage.strokes)
 		{
 			strokes = JSON.parse(localStorage.strokes);
 			redraw(strokes);
 		}
+	} else {
+		alert("Your browser doesn't support storage. Your drawing will be lost when you leave or reload this page.");
 	}
 	
 	window.addEventListener('mousemove', onWindowMouseMove, false);
@@ -363,13 +361,6 @@ function onMenuMouseOver()
 function onMenuMouseOut()
 {
 	isMenuMouseOver = false;
-}
-
-function onMenuSave()
-{
-	// window.open(canvas.toDataURL('image/png'),'mywindow');
-	flatten();
-	window.open(flattenCanvas.toDataURL('image/png'),'mywindow');
 }
 
 function onMenuCoords()
