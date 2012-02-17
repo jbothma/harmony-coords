@@ -395,7 +395,7 @@ function onCanvasMouseDown( event )
 	
 	BRUSH_PRESSURE = 1
 	
-	strokes.push([[event.clientX, event.clientY]]);
+	strokes.push([[event.clientX, event.clientY, BRUSH_PRESSURE]]);
 	brush.strokeStart( event.clientX, event.clientY );
 
 	window.addEventListener('mousemove', onCanvasMouseMove, false);
@@ -408,7 +408,7 @@ function onCanvasMouseMove( event )
 		y = event.clientY;
 
 	BRUSH_PRESSURE = movePressure( x, y );
-	strokes[strokes.length-1].push([x, y]);
+	strokes[strokes.length-1].push([x, y, BRUSH_PRESSURE]);
 	brush.stroke( x, y );
 }
 
@@ -437,7 +437,7 @@ function onCanvasTouchStart( event )
 		clearTimeout(saveTimeOut);
 		BRUSH_PRESSURE = 1;
 
-		strokes.push([[ event.touches[0].pageX, event.touches[0].pageY ]]);
+		strokes.push([[ event.touches[0].pageX, event.touches[0].pageY, BRUSH_PRESSURE ]]);
 		brush.strokeStart( event.touches[0].pageX, event.touches[0].pageY );
 		
 		window.addEventListener('touchmove', onCanvasTouchMove, false);
@@ -453,7 +453,7 @@ function onCanvasTouchMove( event )
 			y = event.touches[0].pageY;
 
 		BRUSH_PRESSURE = 2 * movePressure( x, y );
-		strokes[strokes.length-1].push([x, y]);
+		strokes[strokes.length-1].push([x, y, BRUSH_PRESSURE]);
 		brush.stroke( x, y );
 	}
 }
@@ -495,6 +495,7 @@ function redraw(strokes)
 		
 		for(move in moves)
 		{
+			BRUSH_PRESSURE = moves[move][2];
 			brush.stroke(moves[move][0], moves[move][1]);
 		}
 		
