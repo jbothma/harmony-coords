@@ -11,7 +11,6 @@ var SCREEN_WIDTH = window.innerWidth,
     STORAGE = window.localStorage,
     brush,
     saveTimeOut,
-    wacom,
     i,
     mouseX = 0,
     mouseY = 0,
@@ -43,18 +42,6 @@ function init()
 	
 	container = document.createElement('div');
 	document.body.appendChild(container);
-
-	/*
-	 * TODO: In some browsers a naste "Plugin Missing" window appears and people is getting confused.
-	 * Disabling it until a better way to handle it appears.
-	 * 
-	 * embed = document.createElement('embed');
-	 * embed.id = 'wacom-plugin';
-	 * embed.type = 'application/x-wacom-tablet';
-	 * document.body.appendChild(embed);
-	 *
-	 * wacom = document.embeds["wacom-plugin"];
-	 */
 
 	canvas = document.createElement("canvas");
 	canvas.width = SCREEN_WIDTH;
@@ -406,7 +393,7 @@ function onCanvasMouseDown( event )
 		return;
 	}
 	
-	BRUSH_PRESSURE = wacom && wacom.isWacom ? wacom.pressure : 1;
+	BRUSH_PRESSURE = 1
 	
 	strokes.push([[event.clientX, event.clientY]]);
 	brush.strokeStart( event.clientX, event.clientY );
@@ -417,10 +404,12 @@ function onCanvasMouseDown( event )
 
 function onCanvasMouseMove( event )
 {
-	BRUSH_PRESSURE = wacom && wacom.isWacom ? wacom.pressure : 1;
-	
-	strokes[strokes.length-1].push([event.clientX, event.clientY]);
-	brush.stroke( event.clientX, event.clientY );
+	var x = event.clientX,
+		y = event.clientY;
+
+	BRUSH_PRESSURE = movePressure( x, y );
+	strokes[strokes.length-1].push([x, y]);
+	brush.stroke( x, y );
 }
 
 function onCanvasMouseUp()
@@ -437,9 +426,6 @@ function onCanvasMouseUp()
 	}
 }
 
-
-//
-
 function onCanvasTouchStart( event )
 {
 	cleanPopUps();		
@@ -449,6 +435,7 @@ function onCanvasTouchStart( event )
 		event.preventDefault();
 		
 		clearTimeout(saveTimeOut);
+		BRUSH_PRESSURE = 1;
 
 		strokes.push([[ event.touches[0].pageX, event.touches[0].pageY ]]);
 		brush.strokeStart( event.touches[0].pageX, event.touches[0].pageY );
@@ -462,8 +449,12 @@ function onCanvasTouchMove( event )
 {
 	if(event.touches.length == 1)
 	{
-		strokes[strokes.length-1].push([event.touches[0].pageX, event.touches[0].pageY]);
-		brush.stroke( event.touches[0].pageX, event.touches[0].pageY );
+		var x = event.touches[0].pageX,
+			y = event.touches[0].pageY;
+
+		BRUSH_PRESSURE = 2 * movePressure( x, y );
+		strokes[strokes.length-1].push([x, y]);
+		brush.stroke( x, y );
 	}
 }
 
@@ -498,18 +489,43 @@ function redraw(strokes)
 {
 	for (stroke in strokes)
 	{
-		console.log("drawing " + stroke);
 		moves = strokes[stroke];
 		
-		brush.strokeStart(moves[0][0],moves[0][1]);
+		brush.strokeStart(moves[0][0], moves[0][1]);
 		
 		for(move in moves)
 		{
-			brush.stroke(moves[move][0],moves[move][1]);
+			brush.stroke(moves[move][0], moves[move][1]);
 		}
 		
 		brush.strokeEnd();
 	}
+}
+
+/**
+ * This simulates pressure for current move event based on last
+ * mouse position in last stroke.
+ *
+ * It looks directly at the global strokes variable so it should be
+ * called upon 'mouse move' or 'touch move' events but before adding
+ * the new stroke to the strokes data.
+ */
+function movePressure(x, y)
+{
+	var lastStroke = strokes[strokes.length-1],
+		lastMove = lastStroke[lastStroke.length-1],
+		lastX = lastMove[0],
+		lastY = lastMove[1],
+		dist = Math.sqrt(Math.pow((x-lastX),2) + Math.pow((y-lastY),2)), // thanks pythagoras
+		pressure;
+
+	// long distance between this and last move should give low pressure.
+	// log scale gives more precision in high pressure range.
+	// Add 1 to avoid division by zero
+	// 2/ instead of 1/ because brushes halve the pressure value given.
+	pressure = 2/(1 + Math.log(dist));
+
+	return pressure;
 }
 
 function flatten()
