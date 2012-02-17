@@ -6,6 +6,7 @@ var SCREEN_WIDTH = window.innerWidth,
     SCREEN_HEIGHT = window.innerHeight,
     BRUSH_SIZE = 1,
     BRUSH_PRESSURE = 1,
+    simulatePressure = true,
     COLOR = [0, 0, 0],
     BACKGROUND_COLOR = [250, 250, 250],
     STORAGE = window.localStorage,
@@ -407,7 +408,7 @@ function onCanvasMouseMove( event )
 	var x = event.clientX,
 		y = event.clientY;
 
-	BRUSH_PRESSURE = movePressure( x, y );
+	BRUSH_PRESSURE = (menu.pressure.checked) ? movePressure( x, y ) : 1;
 	strokes[strokes.length-1].push([x, y, BRUSH_PRESSURE]);
 	brush.stroke( x, y );
 }
@@ -452,7 +453,7 @@ function onCanvasTouchMove( event )
 		var x = event.touches[0].pageX,
 			y = event.touches[0].pageY;
 
-		BRUSH_PRESSURE = 2 * movePressure( x, y );
+		BRUSH_PRESSURE = (menu.pressure.checked) ? (2 * movePressure( x, y )) : 1;
 		strokes[strokes.length-1].push([x, y, BRUSH_PRESSURE]);
 		brush.stroke( x, y );
 	}

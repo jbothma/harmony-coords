@@ -12,6 +12,7 @@ Menu.prototype =
 	
 	selector: null,
 	coords: null,
+	pressure: null,
 	clear: null,
 	
 	init: function()
@@ -73,10 +74,21 @@ Menu.prototype =
 		separator = document.createTextNode(" | ");
 		this.container.appendChild(separator);
 		
-		this.coords = document.createElement("span"); //getElementById('coords');
+		this.coords = document.createElement("span");
 		this.coords.className = 'button';
 		this.coords.innerHTML = 'Coords';
 		this.container.appendChild(this.coords);
+
+		this.container.appendChild(document.createTextNode(" | "));
+
+		this.pressLabel = document.createElement("span");
+		this.pressLabel.innerHTML = 'Pressure';
+		this.container.appendChild(this.pressLabel);
+
+		this.pressure = document.createElement("input");
+		this.pressure.type = 'checkbox';
+		this.pressure.checked = true;
+		this.container.appendChild(this.pressure);
 	},
 	
 	setForegroundColor: function( color )
