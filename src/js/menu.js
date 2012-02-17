@@ -66,6 +66,7 @@ Menu.prototype =
 		space = document.createTextNode(" ");
 		this.container.appendChild(space);
 		
+		// CLEAR CANVAS and stored coordinates 
 		this.clear = document.createElement("Clear");
 		this.clear.className = 'button';
 		this.clear.innerHTML = 'Clear';
@@ -73,7 +74,8 @@ Menu.prototype =
 
 		separator = document.createTextNode(" | ");
 		this.container.appendChild(separator);
-		
+
+		// SHOW COORDINATES
 		this.coords = document.createElement("span");
 		this.coords.className = 'button';
 		this.coords.innerHTML = 'Coords';
@@ -81,6 +83,7 @@ Menu.prototype =
 
 		this.container.appendChild(document.createTextNode(" | "));
 
+		// SIMULATE PRESSURE?
 		this.pressLabel = document.createElement("span");
 		this.pressLabel.innerHTML = 'Pressure';
 		this.container.appendChild(this.pressLabel);
@@ -89,6 +92,20 @@ Menu.prototype =
 		this.pressure.type = 'checkbox';
 		this.pressure.checked = true;
 		this.container.appendChild(this.pressure);
+
+		this.container.appendChild(document.createTextNode(" | "));
+
+		// ALLOW DRAWING?
+		this.allowLabel = document.createElement("span");
+		this.allowLabel.innerHTML = 'Allow Drawing';
+		this.allowLabel.title = 'For demo: Sets a javascript variable which'
+		 + ' is checked when you try to draw';
+		this.container.appendChild(this.allowLabel);
+
+		this.allow = document.createElement("input");
+		this.allow.type = 'checkbox';
+		this.allow.checked = true;
+		this.container.appendChild(this.allow);
 	},
 	
 	setForegroundColor: function( color )

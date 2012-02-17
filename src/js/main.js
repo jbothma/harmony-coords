@@ -7,6 +7,7 @@ var SCREEN_WIDTH = window.innerWidth,
     BRUSH_SIZE = 1,
     BRUSH_PRESSURE = 1,
     simulatePressure = true,
+    drawingAllowed = true,
     COLOR = [0, 0, 0],
     BACKGROUND_COLOR = [250, 250, 250],
     STORAGE = window.localStorage,
@@ -76,6 +77,8 @@ function init()
 	menu.coords.addEventListener('touchend', onMenuCoords, false);
 	menu.clear.addEventListener('click', onMenuClear, false);
 	menu.clear.addEventListener('touchend', onMenuClear, false);
+	menu.allow.addEventListener('click', onMenuAllow, false);
+	menu.allow.addEventListener('touchend', onMenuAllow, false);
 	menu.container.addEventListener('mouseover', onMenuMouseOver, false);
 	menu.container.addEventListener('mouseout', onMenuMouseOut, false);
 	container.appendChild(menu.container);
@@ -373,6 +376,11 @@ function onMenuClear()
 	brush = eval("new " + BRUSHES[menu.selector.selectedIndex] + "(context)");
 }
 
+function onMenuAllow()
+{
+	drawingAllowed = menu.allow.checked;
+}
+
 // CANVAS
 
 function onCanvasMouseDown( event )
@@ -394,36 +402,45 @@ function onCanvasMouseDown( event )
 		return;
 	}
 	
-	BRUSH_PRESSURE = 1
+	if (drawingAllowed)
+	{
+		BRUSH_PRESSURE = 1
+		
+		strokes.push([[event.clientX, event.clientY, BRUSH_PRESSURE]]);
+		brush.strokeStart( event.clientX, event.clientY );
 	
-	strokes.push([[event.clientX, event.clientY, BRUSH_PRESSURE]]);
-	brush.strokeStart( event.clientX, event.clientY );
-
-	window.addEventListener('mousemove', onCanvasMouseMove, false);
-	window.addEventListener('mouseup', onCanvasMouseUp, false);
+		window.addEventListener('mousemove', onCanvasMouseMove, false);
+		window.addEventListener('mouseup', onCanvasMouseUp, false);
+	}
 }
 
 function onCanvasMouseMove( event )
 {
 	var x = event.clientX,
 		y = event.clientY;
-
-	BRUSH_PRESSURE = (menu.pressure.checked) ? movePressure( x, y ) : 1;
-	strokes[strokes.length-1].push([x, y, BRUSH_PRESSURE]);
-	brush.stroke( x, y );
+	
+	if (drawingAllowed)
+	{
+		BRUSH_PRESSURE = (menu.pressure.checked) ? movePressure( x, y ) : 1;
+		strokes[strokes.length-1].push([x, y, BRUSH_PRESSURE]);
+		brush.stroke( x, y );
+	}
 }
 
 function onCanvasMouseUp()
 {
-	brush.strokeEnd();
-	
-	window.removeEventListener('mousemove', onCanvasMouseMove, false);
-	window.removeEventListener('mouseup', onCanvasMouseUp, false);
-	
-	if (STORAGE)
+	if (drawingAllowed)
 	{
-		clearTimeout(saveTimeOut);
-		saveTimeOut = setTimeout(saveToLocalStorage, 2000, true);
+		brush.strokeEnd();
+		
+		window.removeEventListener('mousemove', onCanvasMouseMove, false);
+		window.removeEventListener('mouseup', onCanvasMouseUp, false);
+		
+		if (STORAGE)
+		{
+			clearTimeout(saveTimeOut);
+			saveTimeOut = setTimeout(saveToLocalStorage, 2000, true);
+		}
 	}
 }
 
@@ -431,7 +448,7 @@ function onCanvasTouchStart( event )
 {
 	cleanPopUps();		
 
-	if(event.touches.length == 1)
+	if(event.touches.length == 1 && drawingAllowed)
 	{
 		event.preventDefault();
 		
@@ -448,7 +465,7 @@ function onCanvasTouchStart( event )
 
 function onCanvasTouchMove( event )
 {
-	if(event.touches.length == 1)
+	if(event.touches.length == 1 && drawingAllowed)
 	{
 		var x = event.touches[0].pageX,
 			y = event.touches[0].pageY;
@@ -461,7 +478,7 @@ function onCanvasTouchMove( event )
 
 function onCanvasTouchEnd( event )
 {
-	if(event.touches.length == 0)
+	if(event.touches.length == 0 && drawingAllowed)
 	{
 		event.preventDefault();
 		
