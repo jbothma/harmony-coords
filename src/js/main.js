@@ -406,7 +406,7 @@ function onCanvasMouseDown( event )
 	{
 		BRUSH_PRESSURE = 1
 		
-		strokes.push([[event.clientX, event.clientY, BRUSH_PRESSURE]]);
+		saveStrokeStart( event.clientX, event.clientY, BRUSH_PRESSURE );
 		brush.strokeStart( event.clientX, event.clientY );
 	
 		window.addEventListener('mousemove', onCanvasMouseMove, false);
@@ -422,7 +422,7 @@ function onCanvasMouseMove( event )
 	if (drawingAllowed)
 	{
 		BRUSH_PRESSURE = (menu.pressure.checked) ? movePressure( x, y ) : 1;
-		strokes[strokes.length-1].push([x, y, BRUSH_PRESSURE]);
+		saveStrokeMove( x, y, BRUSH_PRESSURE );
 		brush.stroke( x, y );
 	}
 }
@@ -455,7 +455,7 @@ function onCanvasTouchStart( event )
 		clearTimeout(saveTimeOut);
 		BRUSH_PRESSURE = 1;
 
-		strokes.push([[ event.touches[0].pageX, event.touches[0].pageY, BRUSH_PRESSURE ]]);
+		saveStrokeStart( event.touches[0].pageX, event.touches[0].pageY, BRUSH_PRESSURE );
 		brush.strokeStart( event.touches[0].pageX, event.touches[0].pageY );
 		
 		window.addEventListener('touchmove', onCanvasTouchMove, false);
@@ -471,7 +471,7 @@ function onCanvasTouchMove( event )
 			y = event.touches[0].pageY;
 
 		BRUSH_PRESSURE = (menu.pressure.checked) ? (2 * movePressure( x, y )) : 1;
-		strokes[strokes.length-1].push([x, y, BRUSH_PRESSURE]);
+		saveStrokeMove( x, y, BRUSH_PRESSURE );
 		brush.stroke( x, y );
 	}
 }
@@ -495,11 +495,22 @@ function onCanvasTouchEnd( event )
 	}
 }
 
-//
+function saveStrokeStart(X, Y, Z)
+{
+	strokes.push([{'X': X,
+				   'Y': Y,
+				   'Z': Z }]);
+}
+
+function saveStrokeMove(X, Y, Z)
+{
+	strokes[strokes.length-1].push({'X': X,
+									'Y': Y,
+									'Z': Z });
+}
 
 function saveToLocalStorage()
 {
-	//localStorage.canvas = canvas.toDataURL('image/png');
 	localStorage.setItem("strokes", JSON.stringify(strokes));
 }
 
@@ -509,12 +520,12 @@ function redraw(strokes)
 	{
 		moves = strokes[stroke];
 		
-		brush.strokeStart(moves[0][0], moves[0][1]);
+		brush.strokeStart(moves[0].X, moves[0].Y);
 		
 		for(move in moves)
 		{
-			BRUSH_PRESSURE = moves[move][2];
-			brush.stroke(moves[move][0], moves[move][1]);
+			BRUSH_PRESSURE = moves[move].Z;
+			brush.stroke(moves[move].X, moves[move].Y);
 		}
 		
 		brush.strokeEnd();
@@ -533,8 +544,8 @@ function movePressure(x, y)
 {
 	var lastStroke = strokes[strokes.length-1],
 		lastMove = lastStroke[lastStroke.length-1],
-		lastX = lastMove[0],
-		lastY = lastMove[1],
+		lastX = lastMove.X,
+		lastY = lastMove.Y,
 		dist = Math.sqrt(Math.pow((x-lastX),2) + Math.pow((y-lastY),2)), // thanks pythagoras
 		pressure;
 
