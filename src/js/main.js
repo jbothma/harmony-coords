@@ -17,8 +17,6 @@ var SCREEN_WIDTH = window.innerWidth,
     mouseX = 0,
     mouseY = 0,
     container,
-    foregroundColorSelector,
-    backgroundColorSelector,
     menu,
     canvas,
     flattenCanvas,
@@ -34,7 +32,7 @@ init();
 
 function init()
 {
-	var hash, palette, embed, localStorageImage;
+	var hash, embed;
 	
 	if (USER_AGENT.search("android") > -1 || USER_AGENT.search("iphone") > -1)
 		BRUSH_SIZE = 2;
@@ -56,25 +54,8 @@ function init()
 	flattenCanvas = document.createElement("canvas");
 	flattenCanvas.width = SCREEN_WIDTH;
 	flattenCanvas.height = SCREEN_HEIGHT;
-	
-	palette = new Palette();
-	
-	foregroundColorSelector = new ColorSelector(palette);
-	foregroundColorSelector.addEventListener('change', onForegroundColorSelectorChange, false);
-	container.appendChild(foregroundColorSelector.container);
 
-	backgroundColorSelector = new ColorSelector(palette);
-	backgroundColorSelector.addEventListener('change', onBackgroundColorSelectorChange, false);
-	container.appendChild(backgroundColorSelector.container);	
-	
 	menu = new Menu();
-	menu.foregroundColor.addEventListener('click', onMenuForegroundColor, false);
-	menu.foregroundColor.addEventListener('touchend', onMenuForegroundColor, false);
-	menu.backgroundColor.addEventListener('click', onMenuBackgroundColor, false);
-	menu.backgroundColor.addEventListener('touchend', onMenuBackgroundColor, false);
-	menu.selector.addEventListener('change', onMenuSelectorChange, false);
-	menu.coords.addEventListener('click', onMenuCoords, false);
-	menu.coords.addEventListener('touchend', onMenuCoords, false);
 	menu.clear.addEventListener('click', onMenuClear, false);
 	menu.clear.addEventListener('touchend', onMenuClear, false);
 	menu.allow.addEventListener('click', onMenuAllow, false);
@@ -82,9 +63,6 @@ function init()
 	menu.container.addEventListener('mouseover', onMenuMouseOver, false);
 	menu.container.addEventListener('mouseout', onMenuMouseOut, false);
 	container.appendChild(menu.container);
-
-	foregroundColorSelector.setColor( COLOR );
-	backgroundColorSelector.setColor( BACKGROUND_COLOR );
 	
 	if (window.location.hash)
 	{
@@ -95,7 +73,6 @@ function init()
 			if (hash == BRUSHES[i])
 			{
 				brush = eval("new " + BRUSHES[i] + "(context)");
-				menu.selector.selectedIndex = i;
 				break;
 			}
 		}
@@ -109,20 +86,6 @@ function init()
 
 	if (STORAGE)
 	{		
-		if (localStorage.brush_color_red)
-		{
-			COLOR[0] = localStorage.brush_color_red;
-			COLOR[1] = localStorage.brush_color_green;
-			COLOR[2] = localStorage.brush_color_blue;
-		}
-
-		if (localStorage.background_color_red)
-		{
-			BACKGROUND_COLOR[0] = localStorage.background_color_red;
-			BACKGROUND_COLOR[1] = localStorage.background_color_green;
-			BACKGROUND_COLOR[2] = localStorage.background_color_blue;
-		}
-	
 		if (localStorage.getItem("strokes"))
 		{
 			strokes = JSON.parse(localStorage.getItem("strokes"));
@@ -134,8 +97,6 @@ function init()
 	
 	window.addEventListener('mousemove', onWindowMouseMove, false);
 	window.addEventListener('resize', onWindowResize, false);
-	window.addEventListener('keydown', onWindowKeyDown, false);
-	window.addEventListener('keyup', onWindowKeyUp, false);
 	window.addEventListener('blur', onWindowBlur, false);
 	
 	document.addEventListener('mousedown', onDocumentMouseDown, false);
@@ -170,22 +131,8 @@ function onWindowResize()
 
 function onWindowKeyDown( event )
 {
-	if (shiftKeyIsDown)
-		return;
-		
 	switch(event.keyCode)
 	{
-		case 16: // Shift
-			shiftKeyIsDown = true;
-			foregroundColorSelector.container.style.left = mouseX - 125 + 'px';
-			foregroundColorSelector.container.style.top = mouseY - 125 + 'px';
-			foregroundColorSelector.container.style.visibility = 'visible';
-			break;
-			
-		case 18: // Alt
-			altKeyIsDown = true;
-			break;
-			
 		case 68: // d
 			if(BRUSH_SIZE > 1) BRUSH_SIZE --;
 			break;
@@ -194,31 +141,6 @@ function onWindowKeyDown( event )
 			BRUSH_SIZE ++;
 			break;			
 	}
-}
-
-function onWindowKeyUp( event )
-{
-	switch(event.keyCode)
-	{
-		case 16: // Shift
-			shiftKeyIsDown = false;
-			foregroundColorSelector.container.style.visibility = 'hidden';			
-			break;
-			
-		case 18: // Alt
-			altKeyIsDown = false;
-			break;
-
-		case 82: // r
-			brush.destroy();
-			brush = eval("new " + BRUSHES[menu.selector.selectedIndex] + "(context)");
-			break;
-		case 66: // b
-			document.body.style.backgroundImage = null;
-			break;
-	}
-	
-	context.lineCap = BRUSH_SIZE == 1 ? 'butt' : 'round';	
 }
 
 function onWindowBlur( event )
@@ -272,64 +194,6 @@ function onDocumentDrop( event )
 	}	
 }
 
-
-// COLOR SELECTORS
-
-function onForegroundColorSelectorChange( event )
-{
-	COLOR = foregroundColorSelector.getColor();
-	
-	menu.setForegroundColor( COLOR );
-
-	if (STORAGE)
-	{
-		localStorage.brush_color_red = COLOR[0];
-		localStorage.brush_color_green = COLOR[1];
-		localStorage.brush_color_blue = COLOR[2];		
-	}
-}
-
-function onBackgroundColorSelectorChange( event )
-{
-	BACKGROUND_COLOR = backgroundColorSelector.getColor();
-	
-	menu.setBackgroundColor( BACKGROUND_COLOR );
-	
-	document.body.style.backgroundColor = 'rgb(' + BACKGROUND_COLOR[0] + ', ' + BACKGROUND_COLOR[1] + ', ' + BACKGROUND_COLOR[2] + ')';
-	
-	if (STORAGE)
-	{
-		localStorage.background_color_red = BACKGROUND_COLOR[0];
-		localStorage.background_color_green = BACKGROUND_COLOR[1];
-		localStorage.background_color_blue = BACKGROUND_COLOR[2];				
-	}
-}
-
-
-// MENU
-
-function onMenuForegroundColor()
-{
-	cleanPopUps();
-	
-	foregroundColorSelector.show();
-	foregroundColorSelector.container.style.left = ((SCREEN_WIDTH - foregroundColorSelector.container.offsetWidth) / 2) + 'px';
-	foregroundColorSelector.container.style.top = ((SCREEN_HEIGHT - foregroundColorSelector.container.offsetHeight) / 2) + 'px';
-
-	isFgColorSelectorVisible = true;
-}
-
-function onMenuBackgroundColor()
-{
-	cleanPopUps();
-
-	backgroundColorSelector.show();
-	backgroundColorSelector.container.style.left = ((SCREEN_WIDTH - backgroundColorSelector.container.offsetWidth) / 2) + 'px';
-	backgroundColorSelector.container.style.top = ((SCREEN_HEIGHT - backgroundColorSelector.container.offsetHeight) / 2) + 'px';
-
-	isBgColorSelectorVisible = true;
-}
-
 function onMenuSelectorChange()
 {
 	if (BRUSHES[menu.selector.selectedIndex] == "")
@@ -373,7 +237,7 @@ function onMenuClear()
 	saveToLocalStorage();
 
 	brush.destroy();
-	brush = eval("new " + BRUSHES[menu.selector.selectedIndex] + "(context)");
+	brush = eval("new " + BRUSHES[0] + "(context)");
 }
 
 function onMenuAllow()
@@ -389,19 +253,7 @@ function onCanvasMouseDown( event )
 
 	clearTimeout(saveTimeOut);
 	cleanPopUps();
-	
-	if (altKeyIsDown)
-	{
-		flatten();
-		
-		data = flattenCanvas.getContext("2d").getImageData(0, 0, flattenCanvas.width, flattenCanvas.height).data;
-		position = (event.clientX + (event.clientY * canvas.width)) * 4;
-		
-		foregroundColorSelector.setColor( [ data[position], data[position + 1], data[position + 2] ] );
-		
-		return;
-	}
-	
+
 	if (drawingAllowed)
 	{
 		BRUSH_PRESSURE = 1
