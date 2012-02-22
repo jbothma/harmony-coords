@@ -39,7 +39,7 @@ Menu.prototype =
 		this.clear.innerHTML = 'Clear';
 		this.container.appendChild(this.clear);
 
-		separator = document.createTextNode(" | ");
+		separator = document.createTextNode("|");
 		this.container.appendChild(separator);
 
 		// SIMULATE PRESSURE?
@@ -52,7 +52,7 @@ Menu.prototype =
 		this.pressure.checked = true;
 		this.container.appendChild(this.pressure);
 
-		this.container.appendChild(document.createTextNode(" | "));
+		this.container.appendChild(document.createTextNode("|"));
 
 		// ALLOW DRAWING?
 		this.allowLabel = document.createElement("span");
